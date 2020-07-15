@@ -1,0 +1,150 @@
+-Project : ThreadTest
+
+Thread
+새로운 실행 흐름 (메모리에 새로운 자리 차지)
+
+기본적으로 있는 main thread외에 
+thread작업을 통해 사용자 thread생성
+
+thread와 thread객체는 다르다.
+thread는 순차적으로 작업하지 않고 개별적으로 작업된다.
+
+
+thread는 다른 thread의 class영역과 heap영역에 저장된 데이터를 사용할 수 있다.
+
+동기화문제 발생 가능
+{
+ex
+1번 thread에 int a = 1; 선언되어 있는상황
+2번 thread/3번 thread모두 a를 변경시키는 작업을 할 때,
+둘 중 하나가 먼저 끝나고 다른 하나가 시작된다면 문제가 없지만
+그렇지 않다면 문제 발생
+
+}
+-해결방안 synchronized사용 작업을 보장
+
+
+=================================
+사용자 Thread 생성 순서
+1. Thread class를 상속하는 자식 class 생성						-UserThread1
+2. 사용자 Thread에서 실행할 코드를 자식 class의 run() method에 작성			-UserThread1
+3. 자식 class를 이용해서 thread객체를 생성						-MainEx2
+4. thread 객체가 갖고 있는 start() method 호출						-MainEx2 
+===	
+thread생성
+runnable
+running
+dead
+-간단한 thread의 생애주기 - 생성 - runnable - running - daed
+
+1
+2	-> override/impl method -> run()
+3	
+4
+=================================
+
+자바의 규칙
+java는 단일상속을 원칙으로한다.
+단, interface는 예외
+
+public class ChildClass implements inter1, inter2
+class가 impl을 통해 여러 interface 상속가능
+public interface ChildInter extends inter1, inter2{}
+interface가 extemds를 통해 여러 interface 상속가능
+
+때문에 Thread와 class를 동시에 상속불가하기에
+
+Interface를이용 사용자 Thread 생성 순서
+1. UserThread2 class 생성 단, Runnable Interface 구현					-UserRunnable1
+2. run() method에 사용자 Thread에서 실행할 코드를 작성					-UserRunnable1
+3. 현재까진 Thread Class가 아닌 Runnalbe Class이다.
+   UserRunnable Class를이용 runnable 객체 생성						-MainEx3
+4. Thread Class 이용 Thread 객체 생성(runnable 객체를 parameter로 넘긴다.)		-MainEx3
+5. thread 객체가 갖고 있는 start() method 호출						-MainEx3
+===
+thread 생성
+runnable
+running
+dead
+thread 생애주기
+=================================
+
+class/interface 혼합 생성								-MainEx4
+thread의 실행순서는 가늠하기 어렵다.
+
+=================================
+Thread 우선순위 지정 가능 
+setPriority() method- 단, 100% 보장은 할 수 없다.
+
+join() method										-MainEx5
+	-thread가 실행되는 영역에 대해 알아야 한다.
+	run() method 내부는 해당 thread의 영역이다.
+	나머지는 main Thread 영역
+
+ut1 thread가 항상 main thread보다 작업이 일찍 끝나게 하려면
+main thread 영역,즉 main method에서 join() method를 호출해야 한다.			-MainEx5/MainEx6 동일
+
+ut1 thread가 항상 urt thread보다 작업이 일찍 끝나게 하려면				-MainEx7
+urt thread 영역,즉 userrunable1 class의 run method()에서 join() method호출해야한다.	-UserRunnable1
+
+
+=================================
+가장 보편적으로 사용되는 형태								-MainEx8
+-한번만 사용 할 때 주로 사용
+inner class
+	-member inner class
+	-static inner class
+	-local inner class
+	-anonymous inner class
+
+anonymous inner class를 이용								-MainEx8
+=================================
+Synchronized
+동기화문제를 해결하기 위한 modifier
+
+작업내용이 너무 간단해 동기화 문제가 발생 안된 케이스					-MainEx9/SyncTest/MyThread
+											-MainEx9-동기화문제해결x
+									
+
+문제해결방법 2가지
+
+1. 동기화 method	/2보다 속도가 떨어짐 						-Sum/MainEx10/YourThread
+Critical Section을 처리하는 method명에 synchronized를 붙인다.		
+
+2. 동기화 block										-Sum2/MainEx11/YourThread2
+Critical Section을 처리하는 method내부 Critical Section에 
+관련된 코드를 synchronized로 감싼다.
+
+=================================
+
+접근 순서의 동기화
+{
+ex)
+작가/독자/글
+Critical Section : 글
+Thread1 작가
+Thread2 독자
+
+thread2가먼저 실행되어선 안된다.
+}
+주의사항
+공유되는 데이터 클래스가 두개가 만들어져있어야한다.
+											-Board
+board의 get() method - 독자 set() method - 작가
+동기화 x 작업									-Board0/MainEx12/Writer/ReaderThread
+
+
+동기화 작업									-Board/MainEx12/Writer/ReaderThread
+-Boolean 변수 선언하고 하면 좋다.
+-이작업을 응용하면 thread 사이에서 순서를 주고 받을 수 있다.
+wait/notify
+
+=================================
+
+Daemon Thread
+Thread t = new userThread1();
+t.setDaemon(true); <-- 이코드를 작성하면서 DaemonThread가된다.
+t.start();
+
+다른thread가 종료되면 자동 종료
+
