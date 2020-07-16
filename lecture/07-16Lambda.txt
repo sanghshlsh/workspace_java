@@ -1,0 +1,26 @@
+LambdaTest
+
+lambda식 : jdk1.8 이후 지원
+
+functional interface : 추상메소드를 1개만 갖고 있는 interface
+
+lambda식 은 functional interface에서만 가능하다.
+
+
+==============================================
+구현되지 않은 인터페이스 객체 생서방법
+1. 가장 사용하지 않아야 하는 방법					-MainEx/Dog
+2. local inner class							-MainEx/Dog
+
+==============================================
+3. lambda식								-MainEx/Dog/Cat
+	interface명 변수명 = (parameter) -> {
+		overriding
+	};
+
+==============================================
+
+Lambda식을 자주 사용하는 곳
+Set에 있는 데이터 추출							-MainEx2
+
+기존 iterator사용보다 간단
