@@ -1,0 +1,64 @@
+Trigger
+
+
+
+table 생성
+원본
+create table apple(
+id number primary key,
+name varchar2(21),
+location varchar2(200)
+);
+
+백업
+create table apple_back(
+id number primary key,
+name varchar2(21),
+location varchar2(200)
+);
+
+
+=============================================
+trigger는 해당trigger실행에 따른 어떤 결과를 유발하지만 그 바로전에 일어날 행동도 제어할 수 있다.
+
+apple table update실행 전 실행되는 trigger
+
+create or replace trigger trg_before_update_apple
+before update on apple for each row
+begin
+update apple_back set name = :new.name, locatoin = :new.location where id = :old.id
+end;
+/
+
+
+
+public void update int oldId, int ne
+
+insert into apple values (1,'k','Ny')
+insert into apple_back values (1,'k','Ny');
+
+update apple set name = 'kim', location='network' where id = 1
+
+
+
+=============================================
+
+
+trg_after_insert_apple
+
+create or replace trigger trg_after_insert_apple
+after insert on apple for each row
+begin
+insert into apple_back values (:new.id ,:new.name, :new.location);
+end;
+/
+
+
+trg_after_delete_apple
+
+create or replace trigger trg_after_delete_apple
+after delete on apple for each row
+begin
+delete from apple_back where id = :old.id;
+end;
+/
