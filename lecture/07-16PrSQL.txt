@@ -1,0 +1,218 @@
+PrSQL
+
+cmd창에서 진행
+
+system계정의 상위 계정인 sys를 연결시키기 위해서는 다음처럼 접근해야 한다.
+
+sqlplus system/sys1234 as sysdba
+
+이미 sqlplus접속해있다면
+conn을이용
+
+
+
+그 후 system 계정 접속
+conn system/sys1234
+
+계정 생성
+create user st identified by st;
+
+권한부여
+grant connect, resource, dba to st;
+
+계정 접속
+conn st/st
+
+table생성
+create table test(
+id number primary key,
+name varchar2(21),
+addr varchar2(21),
+birth date,
+job varchar2(21),
+grade number
+);
+
+---------------------------------------------------------------------------------------------------
+sequence 자동번호부여 (객체)
+	-단점 시스템이 꺼지지않는다면 문제가 없지만
+		꺼졌다가 켜지면 그다음 번호들은 제멋대로 부여된다.
+
+sequence생성(test table의 id값을 증가시키는 sequence)
+
+create sequence seq_test_id
+start with 10
+increment by 1
+maxvalue 10000;
+
+
+start with x
+increment by y
+x부터 y씩 커지며 z 까지 커진다.
+y는 default값 1
+
+
+============================================================================================
+
+insert into test (id) values (seq_test_id.nextval);
+
+seq_tesT_id이용 id자동부여
+============================================================================================
+select seq_test_id.currval from dual;
+
+seq_test_id의 현재 value 조회
+
+//dual->가상의 테이블
+=============================================================================================
+insert into board (bno, title, content, repRoot, repStep)
+values
+(seq_board_bno.nextval, 'title', 'content',seq_board_bno.currval ,0)
+
+이런식으로 사용
+
+
+================================================================================================
+drop sequence seq_test_id;
+
+sequence drop
+
+
+================================================================================================
+index 조회시 속도향상
+기본적으로 primary key 는 index
+
+
+create index idx_test_id
+on test(id);
+//이미 index이기에 적용불가코드
+
+create index idx_test_name_addr
+on test(name,addr);
+
+create index idx_test_name_job_grade
+on test(name,job,grade);
+=============================================================
+
+Sql sql = "insert into test("id,name,job,addr) values (1, 'kim', 'doctor', "서울");
+를 하다보면 데이터가 쌓이는데
+
+데이터 전송량을 줄이고
+보안을 위해서 데이터를 숨기고
+이 작업을
+stored procedure 가 해준다.
+
+--------------------------------------------------------------
+(stored) procedure
+
+
+Create or replace procedure proc_test_insert(
+myId in number,
+myName in varchar2,
+myJob in varchar2,
+myAddr in varchar2
+)
+as 
+begin
+
+insert into test (id, name, job, addr) values (myId,myName,myjob,myAddr);
+
+end;
+/
+
+in은 안적어둬도 좋지만 적는게 확실하다.
+as는 is로 대체 가능
+================================================================
+
+사용법
+
+exec proc_test_insert(1, 'kim', '경찰', '경기');
+
+exec/execute 어떻게사용하던 상관 없다.
+
+확인
+select * from test;
+
+=================================================================
+test table의 레코드를 id를 이요해 삭제하는 procedure, proc_test_del 작성
+
+create or replace procedure proc_test_del_id(
+myId in number
+)
+as
+
+begin
+
+delete from test where id = myId;
+
+end;
+/
+
+
+execute proc_test_del_id(1);
+
+===================================================================
+사용자 정의 함수
+
+create or replace function 함수명(파라미터)
+return자료형
+as begin
+
+함수
+
+end;
+/
+======================================================================
+입력한 값 그대로 넘겨주는 함수 생성
+
+create or replace function fn_return_original_val(num in number)
+return number
+is 
+
+begin
+
+return num;
+
+end;
+/
+
+사용
+select fn_return_original_val(35) from dual;
+======================================================================
+10%할인가 함수생성
+create or replace function fn_dc_price(price in number)
+return number
+is
+
+dc_price number(7);
+
+begin
+
+select price *(100-10)/100 into dc_price from dual;
+
+return dc_price;
+end;
+/
+
+select fn_dc_price(10000) from dual;
+
+into x
+해당값을 x에 넣는다.
+is/as
+begin 사이에 변수 선언가능
+========================================================================
+
+x퍼센트 할인가 계산 함수
+
+create or replace function fn_dc(price in number, dc in number)
+return number
+is
+
+dc_price number(7);
+
+begin
+
+select price *(100-dc)/100 into dc_price from dual;
+
+return dc_price;
+end;
+/
